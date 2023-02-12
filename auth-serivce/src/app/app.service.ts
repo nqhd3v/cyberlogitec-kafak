@@ -1,20 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import ValidPassDto from './dto/valid-password';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AppService {
-  constructor(private readonly jwtService: JwtService) {}
-
-  public genToken(userId: string): { tokenAuth: string } {
-    const tokenAuth = this.jwtService.sign({ userId });
-    return {
-      tokenAuth,
-    };
-  }
-
-  async validPassword({
+  public async validPassword({
     encrypted,
     password,
   }: ValidPassDto): Promise<{ isOK: boolean }> {
@@ -22,6 +12,7 @@ export class AppService {
       const isOK = await bcrypt.compare(password, encrypted);
       return { isOK };
     } catch (e) {
+      console.error('Error when trying to compare password:', e);
       throw e;
     }
   }

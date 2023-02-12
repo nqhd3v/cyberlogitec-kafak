@@ -9,15 +9,15 @@ import { CarrierTypeService } from './carrier-type.service';
   imports: [
     ClientsModule.register([
       {
-        name: 'CARRIER_MICROSERVICE',
+        name: 'TERMINAL_CARRIER_MICROSERVICE',
         transport: Transport.KAFKA,
         options: {
           client: {
-            clientId: 'carrier',
+            clientId: 'terminal-carrier',
             brokers: ['localhost:9092'],
           },
           consumer: {
-            groupId: 'carrier-consumer',
+            groupId: 'terminal-carrier-consumer',
           },
         },
       },

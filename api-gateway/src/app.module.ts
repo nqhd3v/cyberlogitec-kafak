@@ -27,7 +27,7 @@ import { DatabaseModule } from './database.module';
       }),
       envFilePath: '.env',
     }),
-    // TerminalModule,
+    TerminalModule,
     // ConfigurationModule,
     // OperationTypeModule,
     // CarrierTypeModule,

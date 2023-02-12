@@ -1,24 +1,26 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientKafka } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 import OperationTypeDto from 'src/carrier-type/dto/carrier-type';
-import { Repository } from 'typeorm';
 import { Http400Exception } from 'utils/Exception/http-400.exception';
 import { TerminalOperationType } from './entities/operation-type';
 
 @Injectable()
 export class OperationTypeService {
   constructor(
-    @InjectRepository(TerminalOperationType)
-    private readonly operationRepository: Repository<TerminalOperationType>,
+    @Inject('TERMINAL_OPR_MICROSERVICE')
+    private readonly oprClient: ClientKafka,
   ) {}
 
   public async create(data: OperationTypeDto): Promise<TerminalOperationType> {
     try {
-      const newTermData = this.operationRepository.create(data);
-      return await this.operationRepository.save(newTermData);
+      const res = await lastValueFrom(
+        this.oprClient.send('create-one', JSON.stringify(data)),
+      );
+      return res;
     } catch (err) {
       console.error('Error when creating a new operation-type:', err);
-      throw new Http400Exception();
+      throw new Http400Exception(err.message);
     }
   }
 
@@ -27,16 +29,23 @@ export class OperationTypeService {
     data: OperationTypeDto,
   ): Promise<TerminalOperationType> {
     try {
-      const currentCarrier = await this.operationRepository.findOneBy({ id });
-      const updateProb = { ...currentCarrier, ...data };
-      return await this.operationRepository.save(updateProb);
+      const res = await lastValueFrom(
+        this.oprClient.send('update-by-id', JSON.stringify({ id, data })),
+      );
+      return res;
     } catch (err) {
       console.error(
         'Error when updating a operation-type with its id:',
         id,
         err,
       );
-      throw new Http400Exception();
+      throw new Http400Exception(err.message);
     }
+  }
+
+  async onModuleInit() {
+    this.oprClient.subscribeToResponseOf('create-one');
+    this.oprClient.subscribeToResponseOf('update-by-id');
+    await this.oprClient.connect();
   }
 }

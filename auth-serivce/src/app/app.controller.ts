@@ -8,7 +8,8 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @MessagePattern('valid-password')
-  async handleLogin(@Payload() data: ValidPassDto): Promise<string> {
+  async handleValidPassword(@Payload() data: ValidPassDto): Promise<string> {
+    console.log(data);
     const res = await this.appService.validPassword(data);
     return JSON.stringify(res);
   }

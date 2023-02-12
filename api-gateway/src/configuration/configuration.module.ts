@@ -1,13 +1,28 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigurationController } from './configuration.controller';
 import { ConfigurationService } from './configuration.service';
-import { TerminalConfiguration } from './entities/configuration';
 
 @Module({
   controllers: [ConfigurationController],
   providers: [ConfigurationService],
-  imports: [TypeOrmModule.forFeature([TerminalConfiguration])],
+  imports: [
+    ClientsModule.register([
+      {
+        name: 'TERMINAL_CFG_MICROSERVICE',
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            clientId: 'terminal-cfg',
+            brokers: ['localhost:9092'],
+          },
+          consumer: {
+            groupId: 'terminal-cfg-consumer',
+          },
+        },
+      },
+    ]),
+  ],
   exports: [ConfigurationService],
 })
 export class ConfigurationModule {}

@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { AppController } from './app.controller';
@@ -21,21 +20,6 @@ import { User } from './entities/user';
       envFilePath: '.env',
     }),
     TypeOrmModule.forFeature([User]),
-    ClientsModule.register([
-      {
-        name: 'AUTH_MICROSERVICE',
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            clientId: 'auth',
-            brokers: ['localhost:9092'],
-          },
-          consumer: {
-            groupId: 'auth-consumer',
-          },
-        },
-      },
-    ]),
     DatabaseModule,
   ],
   controllers: [AppController],

@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { BadReqException } from 'utils/Exception/bad-request.exception';
 import { AppService } from './app.service';
 import CreateDto from './dto/create';
@@ -8,7 +8,7 @@ import CreateDto from './dto/create';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @EventPattern('get-by-id')
+  @MessagePattern('get-by-id')
   async handleGetById(@Payload() { id }: { id: string }): Promise<string> {
     try {
       const user = await this.appService.getById(id);

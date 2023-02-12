@@ -3,7 +3,7 @@ import { UserService } from 'src/user/user.service';
 import { Http400Exception } from 'utils/Exception/http-400.exception';
 import { Http503Exception } from 'utils/Exception/http-503.exception';
 import { AuthService } from './auth.service';
-import { iReqWithUser } from './auth.types';
+import { iReqWithUser, iAuthResponse } from './auth.types';
 import RegisterDto from './dto/register';
 import LocalAuthGuard from './gaurd/local.gaurd';
 
@@ -23,7 +23,6 @@ export class AuthController {
       if (user) {
         throw new Http400Exception('auth.username-duplicated');
       }
-      console.log('No user -> Create new one');
       const newUser = await this.userService.create(data);
       return newUser;
     } catch (err) {
@@ -31,12 +30,18 @@ export class AuthController {
     }
   }
 
-  @UseGuards(LocalAuthGuard)
   @Post('login')
-  async validUser(@Req() data: iReqWithUser) {
+  @UseGuards(LocalAuthGuard)
+  async validUser(@Req() { user }: iReqWithUser): Promise<iAuthResponse> {
     try {
-      console.log(data);
-      return data;
+      const token = await this.authService.genAuthToken({ id: user.id });
+      const userData = { ...user };
+      delete userData.password;
+
+      return {
+        user: userData,
+        token,
+      };
     } catch (err) {
       throw new Http503Exception(err.message);
     }

@@ -6,6 +6,7 @@ import { UserService } from 'src/user/user.service';
 import LoginDto from './dto/login';
 import { User } from 'src/user/entities/user';
 import { Http400Exception } from 'utils/Exception/http-400.exception';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,7 @@ export class AuthService {
     @Inject('AUTH_MICROSERVICE')
     private readonly authClient: ClientKafka,
     private readonly userService: UserService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async handleLogin(data: LoginDto): Promise<User> {
@@ -41,14 +43,24 @@ export class AuthService {
     encrypted: string,
   ): Promise<{ isOK: boolean }> {
     try {
-      return lastValueFrom(
+      return await lastValueFrom(
         this.authClient.send(
           'valid-password',
           JSON.stringify({ password, encrypted }),
         ),
       );
     } catch (err) {
-      throw new Http503Exception(err.message);
+      throw err;
     }
+  }
+
+  public genAuthToken(fieldValues: Partial<User>): string {
+    const tokenAuth = this.jwtService.sign(fieldValues);
+    return tokenAuth;
+  }
+
+  async onModuleInit() {
+    this.authClient.subscribeToResponseOf('valid-password');
+    await this.authClient.connect();
   }
 }

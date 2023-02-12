@@ -19,7 +19,6 @@ import { JwtModule } from '@nestjs/jwt';
             clientId: 'auth',
             brokers: ['localhost:9092'],
           },
-          producerOnlyMode: true,
           consumer: {
             groupId: 'auth-consumer',
           },
