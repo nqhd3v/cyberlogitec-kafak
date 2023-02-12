@@ -1,0 +1,24 @@
+version: "3"
+services:
+  cyberlogitec_terminals_zookeeper:
+    container_name: cyberlogitec_terminals_zookeeper
+    image: 'bitnami/zookeeper:latest'
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  cyberlogitec_terminals_kafka:
+    container_name: cyberlogitec_terminals_kafka
+    image: 'bitnami/kafka:latest'
+    ports:
+    - $KAFKA_PORT:9092
+    env_file:
+    - .env
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=cyberlogitec_terminals_zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - cyberlogitec_terminals_zookeeper
